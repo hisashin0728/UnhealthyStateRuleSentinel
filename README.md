@@ -1,4 +1,4 @@
-# UnhealthyStateRuleSentinel
+# Detection 'Unhealthy' State of Microsoft Defender for Cloud on Analytics Rule in Microsoft Sentinel
 This Repository provides detection rule when Recommendation of Microsoft Defender for Cloud state was changed to "Unhealthy".
 
 # 1. How to import
