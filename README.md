@@ -1,7 +1,7 @@
 # UnhealthyStateRuleSentinel
 This Repository provides detection rule when Recommendation of Microsoft Defender for Cloud state was changed to "Unhealthy".
 
-# How to import
+# 1. How to import
 You can select import button from Microsoft Sentinel.
 Caution: 
  - Requires "Recommendation" table in the target LogAnalytics workspace.
@@ -9,7 +9,7 @@ Caution:
 
 <img width="774" alt="image" src="https://user-images.githubusercontent.com/55295601/196851071-0f1ee2ad-2aac-4e12-84fb-ababd27d73da.png">
 
-# Current KQL Query.
+# 2. Current KQL Query in Analytics Rule
 Current version, here is a Kusto Query in this package.
 
 ```
@@ -28,7 +28,46 @@ SecurityRecommendation
 
 If you want to monitor multi-cloud environment, comment out '| where Environment == "Azure"'.
 
-# CurrentParameter
+# 3. (Option) Filtering Recommendations via WatchList
+I suppose many customer would like to filter specific recommendations that was triggered to "Unhealthy" Status, because normaly ASC (Microsoft Defender for Cloud) generates many recommendation events. If you want to filter and detect alert for specific Recommendations, you can use Watchlist feature for filtering recommendations.
+
+Here is a sample CSV for Watchlist.
+
+```csv
+ASC_Reco
+TLS should be updated to the latest version for API apps
+TLS should be updated to the latest version for function apps
+TLS should be updated to the latest version for web apps
+Microsoft Defender for servers should be enabled
+Microsoft Defender for Containers should be enabled
+Microsoft Defender for Azure SQL Database servers should be enabled
+Microsoft Defender for DNS should be enabled
+Microsoft Defender for open-source relational databases should be enabled
+Microsoft Defender for Resource Manager should be enabled
+Microsoft Defender for SQL on machines should be enabled on workspaces
+Microsoft Defender for SQL servers on machines should be enabled
+Microsoft Defender for SQL should be enabled for unprotected Azure SQL servers
+Microsoft Defender for SQL should be enabled for unprotected SQL Managed Instances
+Microsoft Defender for Storage should be enabled
+Microsoft Defender for Key Vault should be enabled
+```
+
+Then you will update Kusto Query in Analytics template as follows.
+
+```
+let queryfrequency = 1h;
+//Watchlist as a variable
+let ASC_Rec_watchlist = (_GetWatchlist('ASC_Reco') | project ASC_Reco);
+
+SecurityRecommendation
+| where TimeGenerated > ago(queryfrequency)
+| where RecommendationState == "Unhealthy"
+| where IsSnapshot == "false" // For Continuous Export without Snapshot
+| where Environment == "Azure" //For Azure
+| where RecommendationName in (ASC_Rec_watchlist)
+```
+
+# 4. CurrentParameter
 Here is a current parameter on this package.
 
 |  Parameter  |  Value  | Description |
