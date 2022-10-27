@@ -1,7 +1,12 @@
 # Detection 'Unhealthy' State of Microsoft Defender for Cloud on Analytics Rule in Microsoft Sentinel
 This Repository provides detection rule when Recommendation of Microsoft Defender for Cloud state was changed to "Unhealthy".
 
-# 1. How to import
+# 1. System Diagram
+Configuration image as follows.
+![image](https://user-images.githubusercontent.com/55295601/198253654-8857cc7b-a228-4405-a578-be6a7deadd03.png)
+
+
+# 2. How to import
 You can select import button from Microsoft Sentinel.
 Caution: 
  - Requires "Recommendation" table in the target LogAnalytics workspace.
@@ -9,7 +14,7 @@ Caution:
 
 <img width="774" alt="image" src="https://user-images.githubusercontent.com/55295601/196851071-0f1ee2ad-2aac-4e12-84fb-ababd27d73da.png">
 
-# 2. Current KQL Query in Analytics Rule
+# 3. Current KQL Query in Analytics Rule
 Current version, here is a Kusto Query in this package.
 
 ```
@@ -28,7 +33,7 @@ SecurityRecommendation
 
 If you want to monitor multi-cloud environment, comment out '| where Environment == "Azure"'.
 
-# 3. (Option) Filtering Recommendations via WatchList
+# 4. (Option) Filtering Recommendations via WatchList
 I suppose many customer would like to filter specific recommendations that was triggered to "Unhealthy" Status, because normaly ASC (Microsoft Defender for Cloud) generates many recommendation events. If you want to filter and detect alert for specific Recommendations, you can use Watchlist feature for filtering recommendations.
 
 Here is a sample CSV for Watchlist.
@@ -67,7 +72,7 @@ SecurityRecommendation
 | where RecommendationName in (ASC_Rec_watchlist)
 ```
 
-# 4. CurrentParameter
+# 5. CurrentParameter
 Here is a current parameter on this package.
 
 |  Parameter  |  Value  | Description |
@@ -77,4 +82,3 @@ Here is a current parameter on this package.
 | RecommendationSeverity | High/Middle/Low | Recommendation Severity |
 | FirstEvaluationDate |  | First Evaluation Date by Azure Policy |
 | StatusChangeDate |  | Status Change Date by Azure Policy |
-
