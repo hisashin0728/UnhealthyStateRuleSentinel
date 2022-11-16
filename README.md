@@ -7,7 +7,7 @@ Configuration image as follows.
 
 
 # 2. How to import
-You can select import button from Microsoft Sentinel.
+You can import [template json](https://github.com/hisashin0728/UnhealthyStateRuleSentinel/blob/main/Detect_Unhealthy_State_from_MDFC.json) from Microsoft Sentinel.
 Caution: 
  - Requires "Recommendation" table in the target LogAnalytics workspace.
  - Previously you need to configure "Continuous Export" on Microsoft Defender for Cloud to the Sentinel Log Analytics Workspace.
@@ -34,9 +34,16 @@ SecurityRecommendation
 If you want to monitor multi-cloud environment, comment out '| where Environment == "Azure"'.
 
 # 4. (Option) Filtering Recommendations via WatchList
-I suppose many customer would like to filter specific recommendations that was triggered to "Unhealthy" Status, because normaly ASC (Microsoft Defender for Cloud) generates many recommendation events. If you want to filter and detect alert for specific Recommendations, you can use Watchlist feature for filtering recommendations.
+I suppose many customers would like to filter specific recommendations that was triggered to "Unhealthy" Status, because normaly ASC (Microsoft Defender for Cloud) generates many recommendation events. If you want to filter and detect alert for specific Recommendations, you can use Watchlist feature for filtering recommendations.
 
-Here is a sample CSV for Watchlist.
+Here is customized package for [template json file](https://github.com/hisashin0728/UnhealthyStateRuleSentinel/blob/main/Detect_Unhealthy_State_from_MDFC_watchlist.json).
+You can easily upload and import customized analytics rule on Microsoft Sentinel.
+
+After importing template json, you need to create two watchlists.
+
+1. "ASC_Reco" watchlist for filtering recommendations.
+
+Here is a [sample CSV for Watchlist](https://github.com/hisashin0728/UnhealthyStateRuleSentinel/commit/15b75c8900d98194012e68f30752ddb6a87f1371).
 
 ```csv
 ASC_Reco
@@ -57,11 +64,21 @@ Microsoft Defender for Storage should be enabled
 Microsoft Defender for Key Vault should be enabled
 ```
 
-Then you will update Kusto Query in Analytics template as follows.
+2. "testwatchlist" for mapping Subscription ID to Subscription name.
+
+Here is a [sample CSV for watchlist](https://github.com/hisashin0728/UnhealthyStateRuleSentinel/blob/main/watchlistsub.csv).
+This csv file is used by analytics rule which will notify subscription name on incident alert.
+
+```csv
+SubscriptionId,SubDescription
+11111111-eec5-4873-a79c-84ed72c481a2,MySubscription-Prod
+11112222-eec5-4873-a79c-84ed72c481a2,MySubscription-Dev
+11113333-eec5-4873-a79c-84ed72c481a2,MySubscription-Sandbox
+```
+
+As for custom analytics query, you cahh check the watchlist version of this package.
 
 ```
-let queryfrequency = 1h;
-//Watchlist as a variable
 let ASC_Rec_watchlist = (_GetWatchlist('ASC_Reco') | project ASC_Reco);
 
 SecurityRecommendation
@@ -70,6 +87,15 @@ SecurityRecommendation
 | where IsSnapshot == "false" // For Continuous Export without Snapshot
 | where Environment == "Azure" //For Azure
 | where RecommendationName in (ASC_Rec_watchlist)
+| extend
+    FirstEvaluationDate = tostring(Properties.status.firstEvaluationDate),
+    StatusChangeDate = tostring(Properties.status.statusChangeDate)
+| extend
+    SubscriptionId = split(AssessedResourceId, "/",2)[0],
+    ResouceGroup = split(AssessedResourceId, "/",4)[0]
+| extend tostring(SubscriptionId)
+| lookup kind=leftouter _GetWatchlist('testwatchlist') on $left.SubscriptionId == $right.SearchKey
+| project TimeGenerated,RecommendationName,RecommendationSeverity,FirstEvaluationDate,StatusChangeDate,AssessedResourceId,SubscriptionId,ResouceGroup,SubDescription
 ```
 
 # 5. CurrentParameter
