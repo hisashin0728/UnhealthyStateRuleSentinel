@@ -1,0 +1,29 @@
+ASC_Reco
+TLS should be updated to the latest version for API apps
+TLS should be updated to the latest version for function apps
+TLS should be updated to the latest version for web apps
+Microsoft Defender for servers should be enabled
+Microsoft Defender for Containers should be enabled
+Microsoft Defender for Azure SQL Database servers should be enabled
+Microsoft Defender for DNS should be enabled
+Microsoft Defender for open-source relational databases should be enabled
+Microsoft Defender for Resource Manager should be enabled
+Microsoft Defender for SQL on machines should be enabled on workspaces
+Microsoft Defender for SQL servers on machines should be enabled
+Microsoft Defender for SQL should be enabled for unprotected Azure SQL servers
+Microsoft Defender for SQL should be enabled for unprotected SQL Managed Instances
+Microsoft Defender for Storage should be enabled
+Microsoft Defender for Key Vault should be enabled
+Diagnostic logs in App Service should be enabled
+Diagnostic logs in Azure Stream Analytics should be enabled
+Diagnostic logs in Batch accounts should be enabled
+Diagnostic logs in Event Hub should be enabled
+Diagnostic logs in Kubernetes services should be enabled
+Diagnostic logs in Logic Apps should be enabled
+Diagnostic logs in Search services should be enabled
+Diagnostic logs in Service Bus should be enabled
+Diagnostic logs in Virtual Machine Scale Sets should be enabled
+Diagnostic logs in Azure Data Lake Store should be enabled
+Diagnostic logs in Data Lake Analytics should be enabled
+Diagnostic logs in Key Vault should be enabled
+Diagnostic logs in IoT Hub should be enabled
