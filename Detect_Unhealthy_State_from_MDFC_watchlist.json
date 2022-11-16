@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/9803c04e-ed65-404c-8923-2f5aeb200afb')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/9803c04e-ed65-404c-8923-2f5aeb200afb')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2022-10-01-preview",
+            "properties": {
+                "displayName": "Detect Unhealthy state from Microsoft Defedender for Cloud Recommendations",
+                "description": "This rule is detecting changing to \"Unhealthy\" State for Recommendations table from Microsoft Defender for Cloud. This rule checks \"Recommendations\" table, so customer needs continuous exports settings at Microsoft Defender for Cloud.",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let queryfrequency = 1h;\r\n//Watchlist as a variable\r\nlet ASC_Rec_watchlist = (_GetWatchlist('ASC_Reco') | project ASC_Reco);\r\n\r\nSecurityRecommendation\r\n| where TimeGenerated > ago(queryfrequency)\r\n| where RecommendationState == \"Unhealthy\"\r\n| where IsSnapshot == \"false\" // For Continuous Export without Snapshot\r\n| where Environment == \"Azure\" //For Azure\r\n| where RecommendationName in (ASC_Rec_watchlist)\r\n| extend\r\n    FirstEvaluationDate = tostring(Properties.status.firstEvaluationDate),\r\n    StatusChangeDate = tostring(Properties.status.statusChangeDate)\r\n| extend\r\n    SubscriptionId = split(AssessedResourceId, \"/\",2)[0],\r\n    ResouceGroup = split(AssessedResourceId, \"/\",4)[0]\r\n| extend tostring(SubscriptionId)\r\n| lookup kind=leftouter _GetWatchlist('testwatchlist') on $left.SubscriptionId == $right.SearchKey\r\n| project TimeGenerated,RecommendationName,RecommendationSeverity,FirstEvaluationDate,StatusChangeDate,AssessedResourceId,SubscriptionId,ResouceGroup,SubDescription",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT1H",
+                        "matchingMethod": "Selected",
+                        "groupByEntities": [
+                            "AzureResource"
+                        ],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "AlertPerResult"
+                },
+                "alertDetailsOverride": {
+                    "alertDisplayNameFormat": "{{RecommendationName}}  Changes  to Unhealthy State in {{SubDescription}}",
+                    "alertDescriptionFormat": "Recommendation state was changed to \"Unhealthy\".\nPlease check the ResourceId and stateChangeDate.\nDate: {{StatusChangeDate}} \nSubscription : {{SubDescription}}\nResourceId: {{AssessedResourceId}}."
+                },
+                "customDetails": {
+                    "SubDescription": "SubDescription",
+                    "ResourceGroup": "ResouceGroup"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "AzureResource",
+                        "fieldMappings": [
+                            {
+                                "identifier": "ResourceId",
+                                "columnName": "AssessedResourceId"
+                            }
+                        ]
+                    }
+                ],
+                "sentinelEntitiesMappings": null
+            }
+        }
+    ]
+}
