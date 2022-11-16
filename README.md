@@ -98,6 +98,15 @@ SecurityRecommendation
 | project TimeGenerated,RecommendationName,RecommendationSeverity,FirstEvaluationDate,StatusChangeDate,AssessedResourceId,SubscriptionId,ResouceGroup,SubDescription
 ```
 
+The customized package contains custom event parameters for Subscription Name.
+![image](https://user-images.githubusercontent.com/55295601/202185960-31674c04-0090-486d-b4c7-238e6cb19ffe.png)
+
+Customized package notify alert with {{RecommendationName}} and {{SubDescription}}.
+![image](https://user-images.githubusercontent.com/55295601/202186353-573274fa-4655-45a5-8ef5-981404840a63.png)
+
+
+
+
 # 5. CurrentParameter
 Here is a current parameter on this package.
 
