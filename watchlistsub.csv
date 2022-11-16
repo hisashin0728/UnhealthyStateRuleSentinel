@@ -1,0 +1,4 @@
+SubscriptionId,SubDescription
+11111111-eec5-4873-a79c-84ed72c481a2,MySubscription-Prod
+11112222-eec5-4873-a79c-84ed72c481a2,MySubscription-Dev
+11113333-eec5-4873-a79c-84ed72c481a2,MySubscription-Sandbox
