@@ -10,7 +10,7 @@ Configuration image as follows.
 You can select import button from Microsoft Sentinel.
 Caution: 
  - Requires "Recommendation" table in the target LogAnalytics workspace.
- - That means, previously you need to configure "Continuous Export" from Microsoft Defender for Cloud to the Sentinel LA Workspace.
+ - Previously you need to configure "Continuous Export" on Microsoft Defender for Cloud to the Sentinel Log Analytics Workspace.
 
 <img width="774" alt="image" src="https://user-images.githubusercontent.com/55295601/196851071-0f1ee2ad-2aac-4e12-84fb-ababd27d73da.png">
 
