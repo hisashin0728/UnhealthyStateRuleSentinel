@@ -104,7 +104,10 @@ The customized package contains custom event parameters for Subscription Name.
 Customized package notify alert with {{RecommendationName}} and {{SubDescription}}.
 ![image](https://user-images.githubusercontent.com/55295601/202186353-573274fa-4655-45a5-8ef5-981404840a63.png)
 
+The Incident Alerts is included in Subscription name that is customized in watchlist by customer.
+This would be useful for secuity operator who manage many subscriptions.
 
+![image](https://user-images.githubusercontent.com/55295601/202324550-4bd548cb-a64f-4030-8c88-0b555c37388b.png)
 
 
 # 5. CurrentParameter
