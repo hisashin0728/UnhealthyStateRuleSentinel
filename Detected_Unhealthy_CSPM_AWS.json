@@ -1,0 +1,73 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a186d548-0f2d-4ccf-b248-e6e5de80ad5f')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a186d548-0f2d-4ccf-b248-e6e5de80ad5f')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2022-11-01-preview",
+            "properties": {
+                "displayName": "Detect Unhealthy state from Microsoft Defedender for Cloud Recommendations - AWS",
+                "description": "This rule is detecting changing to \"Unhealthy\" State for Recommendations table from Microsoft Defender for Cloud. This rule checks \"Recommendations\" table, so customer needs continuous exports settings at Microsoft Defender for Cloud.",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let dt_lookBack = ago(1h);\r\nlet history_lookBack = ago(7d);\r\nSecurityRecommendation\r\n| where TimeGenerated >= dt_lookBack\r\n| where RecommendationState == \"Unhealthy\"\r\n| where IsSnapshot == \"false\" // For Continuous Export without Snapshot\r\n| where Environment == \"AWS\" //For AWS\r\n//\r\n// Except last 7 Days Unhealthy AWS Resources by join leftanti\r\n| join kind=leftanti (\r\n    SecurityRecommendation\r\n    | where TimeGenerated between(history_lookBack .. dt_lookBack)\r\n    | where RecommendationState == \"Unhealthy\"\r\n    | where IsSnapshot == \"false\"\r\n    | where Environment == \"AWS\"\r\n    | summarize count() by RecommendationName,AssessedResourceId\r\n    )\r\n     on RecommendationName,AssessedResourceId\r\n//\r\n// Extend AWS Resource Information\r\n| extend\r\n    FirstEvaluationDate = tostring(Properties.status.firstEvaluationDate),\r\n    StatusChangeDate = tostring(Properties.status.statusChangeDate),\r\n    aws_arn = tostring(RecommendationAdditionalData.nativeCloudUniqueIdentifier),\r\n    aws_account = tostring(RecommendationAdditionalData.hierarchyId),\r\n    aws_region = tostring(RecommendationAdditionalData.region)\r\n| project TimeGenerated,RecommendationName,RecommendationSeverity,FirstEvaluationDate,StatusChangeDate, Description\r\n, RemediationDescription,aws_account, aws_region,aws_arn,AssessedResourceId",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "P7D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "startTimeUtc": "2023-09-08T05:00:00.000Z",
+                "tactics": [],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "P7D",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [
+                            "AzureResource"
+                        ],
+                        "groupByAlertDetails": [
+                            "DisplayName"
+                        ],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "AlertPerResult"
+                },
+                "alertDetailsOverride": {
+                    "alertDisplayNameFormat": "{{RecommendationName}}",
+                    "alertDescriptionFormat": "{{{Description}} \nAction:\n{{RemediationDescription}}",
+                    "alertDynamicProperties": []
+                },
+                "customDetails": {},
+                "entityMappings": [
+                    {
+                        "entityType": "AzureResource",
+                        "fieldMappings": [
+                            {
+                                "identifier": "ResourceId",
+                                "columnName": "AssessedResourceId"
+                            }
+                        ]
+                    }
+                ],
+                "sentinelEntitiesMappings": null,
+                "templateVersion": null
+            }
+        }
+    ]
+}
