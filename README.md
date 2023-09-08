@@ -31,7 +31,9 @@ SecurityRecommendation
 | project TimeGenerated,RecommendationName,RecommendationSeverity,FirstEvaluationDate,StatusChangeDate,AssessedResourceId,SubscriptionId,ResouceGroup
 ```
 
+
 - For AWS Recommentations
+
 ```
 let dt_lookBack = ago(1d);
 let history_lookBack = ago(7d);
