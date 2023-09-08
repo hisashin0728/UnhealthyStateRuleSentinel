@@ -31,6 +31,38 @@ SecurityRecommendation
 | project TimeGenerated,RecommendationName,RecommendationSeverity,FirstEvaluationDate,StatusChangeDate,AssessedResourceId,SubscriptionId,ResouceGroup
 ```
 
+- For AWS Recommentations
+```
+let dt_lookBack = ago(1d);
+let history_lookBack = ago(7d);
+SecurityRecommendation
+| where TimeGenerated >= dt_lookBack
+| where RecommendationState == "Unhealthy"
+| where IsSnapshot == "false" // For Continuous Export without Snapshot
+| where Environment == "AWS" //For AWS
+//
+// Except last 7 Days Unhealthy AWS Resources by join leftanti
+| join kind=leftanti (
+    SecurityRecommendation
+    | where TimeGenerated between(history_lookBack .. dt_lookBack)
+    | where RecommendationState == "Unhealthy"
+    | where IsSnapshot == "false"
+    | where Environment == "AWS"
+    | summarize count() by RecommendationName,AssessedResourceId
+    )
+     on RecommendationName,AssessedResourceId
+//
+// Extend AWS Resource Information
+| extend
+    FirstEvaluationDate = tostring(Properties.status.firstEvaluationDate),
+    StatusChangeDate = tostring(Properties.status.statusChangeDate),
+    aws_arn = tostring(RecommendationAdditionalData.nativeCloudUniqueIdentifier),
+    aws_account = tostring(RecommendationAdditionalData.hierarchyId),
+    aws_region = tostring(RecommendationAdditionalData.region)
+| project TimeGenerated,RecommendationName,RecommendationSeverity,FirstEvaluationDate,StatusChangeDate, Description
+, RemediationDescription,aws_account, aws_region,aws_arn
+```
+
 If you want to monitor multi-cloud environment, comment out '| where Environment == "Azure"'.
 
 # 4. (Option) Filtering Recommendations via WatchList
